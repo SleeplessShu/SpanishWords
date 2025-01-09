@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#1A1B22</color>
+    <color name="black_0.25">#401A1B22</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="white_0.25">#40FFFFFF</color>
+    <color name="blue">#3772E7</color>
+    <color name="blueLight">#9FBBF3</color>
+    <color name="grey">#AEAFB4</color>
+    <color name="greyLight">#E6E8EB</color>
+
+
+    <!--отладочные цвета-->
+    <color name="pink">#FF4886</color>
+    <color name="green">#009688</color>
+    <color name="magenta">#673AB7</color>
+
+
+    <!--новые цвета-->
+    <color name="darkblue">#111D35</color>
+    <color name="bluegreen">#125359</color>
+    <color name="bluegreen2">#01272A</color>
+    <color name="darkorange">#BF3F03</color>
+    <color name="dark_red">#BE1250</color>
+    <color name="peach">#FF9D81</color>
+    <color name="yellow">#F3EF7D</color>
+    <color name="lime">#A8E72E</color>
+
+    <color name="heart_border">#BE1250</color>
+    <color name="heart_infill_full">#BE1250</color>
+    <color name="heart_infill_empty">#125359</color>
+
+</resources>

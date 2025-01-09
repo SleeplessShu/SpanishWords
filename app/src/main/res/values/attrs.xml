@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="colorSwitcherTop" format="reference|color" />
+    <attr name="colorSwitcherBottom" format="reference|color" />
+    <attr name="colorTextInputFont" format="reference|color" />
+    <attr name="colorTextInputBackground" format="reference|color" />
+    <attr name="colorButtonPlayerBackground" format="reference|color" />
+</resources>

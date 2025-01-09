@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        style="@style/Header"
+        android:id="@+id/tvResult"
+        android:paddingTop="@dimen/padding_largeXL"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="YOU WIN" />
+
+    <TextView
+        style="@style/Header_ver2"
+        android:paddingTop="@dimen/padding_large"
+        android:id="@+id/tvAnnouncement"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvResult"
+        android:text="YOUR SCORE IS" />
+
+    <TextView
+        android:paddingTop="@dimen/padding_small"
+        style="@style/Header_ver2"
+        android:id="@+id/tv_Score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvAnnouncement"
+        tools:text="0023232300" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/bNewGame"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/padding_large"
+        android:layout_marginTop="@dimen/dim_20dp"
+        android:background="@drawable/word_background_default"
+        android:paddingHorizontal="@dimen/dim_20dp"
+        android:text="@string/button_text_start_game"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_Score" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_marginVertical="@dimen/padding_small"
+        android:id="@+id/bRestart"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dim_20dp"
+        android:background="@drawable/word_background_default"
+        android:paddingHorizontal="@dimen/dim_20dp"
+        android:text="@string/button_text_restart_round"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/bNewGame" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

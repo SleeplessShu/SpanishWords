@@ -1,0 +1,24 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Тень (справа и снизу) -->
+    <item>
+        <shape>
+            <solid android:color="@color/bluegreen2" />
+            <padding
+                android:bottom="@dimen/shadow_padding"
+                android:right="@dimen/shadow_padding" />
+            <corners
+                android:bottomLeftRadius="@dimen/radius_medium"
+                android:topRightRadius="@dimen/radius_medium"
+                android:topLeftRadius="@dimen/radius_medium"/>
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <solid android:color="@color/bluegreen" />
+            <corners
+                android:topLeftRadius="@dimen/radius_small"
+                android:topRightRadius="@dimen/radius_small"
+                android:bottomLeftRadius="@dimen/radius_small" />
+        </shape>
+    </item>
+</layer-list>

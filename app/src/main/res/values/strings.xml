@@ -1,0 +1,77 @@
+<resources>
+    <!-- TITLES -->
+    <string name="title_application_name">WordsMatch</string>
+
+    <string name="state_title_game">Game</string>
+    <string name="state_title_settings">Options</string>
+    <string name="state_title_loading">Loading...</string>
+    <string name="state_title_result">Score</string>
+    <string name="state_title_match_settings">Match settings</string>
+
+
+    <string name="empty">     </string>
+
+    <string name="end_game_phrase_win">VICTORY</string>
+    <string name="end_game_phrase_loose">FAIL</string>
+
+    <string name="button_text_start_game">START_GAME</string>
+    <string name="button_text_new_game">NEW_GAME</string>
+    <string name="button_text_restart_round">RESTART</string>
+
+
+    <!--
+        <string name="title_screen_name">Playlist Maker</string>
+        <string name="title_activity_search">SearchActivity</string>
+        <string name="title_activity_settings">SettingsActivity</string>
+        <string name="title_activity_mediateka">MediatekaActivity</string>
+        <string name="title_activity_player">PlayerActivity</string>
+      -->
+
+
+    <string name="mailToSupportSubject">Сообщение разработчикам и разработчицам приложения Playlist Maker</string>
+    <string name="mailToSupportText">Спасибо разработчикам и разработчицам за крутое приложение!</string>
+    <!--LINKS-->
+    <string name="linkToAgreement">https://yandex.ru/legal/practicum_offer/</string>
+    <string name="linkToAndroidCourse">https://practicum.yandex.ru/android-developer/</string>
+    <string name="supportEmail">di.burmistrov@yandex.ru</string>
+    <!--HINTS-->
+    <string name="hint_Search">Поиск</string>
+
+    <!--Messeges-->
+
+    <string name="something_went_wrong">something_went_wrong</string>
+    <string name="nothing_found">Ничего не нашлось</string>
+    <string name="network_error1">Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету</string>
+    <string name="network_error2">Загрузка не удалась. Проверьте подключение к интернету</string>
+    <string name="network_error3">Возникла неизвестная проблема. Повторите попытку позднее</string>
+
+
+    <!--Player-->
+    <string name="sDuration">Длительность</string>
+    <string name="sAlbum">Альбом</string>
+    <string name="sYear">Год</string>
+    <string name="sGenre">Жанр</string>
+    <string name="sCountry">Страна</string>
+
+    <!--Mediateka-->
+    <string name="noPlaylists">Вы не создали\nни одного плейлиста</string>
+    <string name="newPlaylists">Новый плейлист</string>
+    <string name="emptyMediateka">Ваша медиатека пуста</string>
+    <string name="FavTracks">Избранные треки</string>
+    <string name="FavPlaylists">Плейлисты</string>
+
+
+    <!--basic things-->
+    <string name="app_name">Spanish words</string>
+
+    <!--bottom menu-->
+    <string name="game">Game</string>
+    <string name="score">Score</string>
+    <string name="settings">Settings</string>
+
+    <!--settings menu-->
+    <string name="switchDarkTheme">Dark theme</string>
+    <string name="shareApp">Share App</string>
+    <string name="support">Mail to support</string>
+
+</resources>

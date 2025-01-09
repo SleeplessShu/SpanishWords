@@ -1,0 +1,31 @@
+package com.example.spanishwords.game.domain.models
+
+enum class WordCategory {
+    ANIMALS,
+    FOOD,
+    FAMILY,
+    CLOTHES,
+    PLACES,
+    TIME,
+    TRANSPORT,
+    WORK,
+    HOUSE,
+    EDUCATION,
+    NATURE,
+    EMOTIONS,
+    COLORS,
+    NUMBERS,
+    ACTIONS,
+    OBJECTS,
+    ABSTRACT,
+    ENTERTAINMENT,
+    COMMUNICATION,
+    TRAVEL,
+    HEALTH,
+    GENERAL_ADJECTIVES,
+    GENERAL_ADVERBS,
+    GENERAL_PRONOUNS,
+    GENERAL_MISC,
+    BODY,
+    RANDOM
+}

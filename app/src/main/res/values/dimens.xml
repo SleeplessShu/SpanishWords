@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="shadow_padding">4dp</dimen>
+    <dimen name="padding_small">12dp</dimen>
+    <dimen name="padding_medium">24dp</dimen>
+    <dimen name="padding_large">48dp</dimen>
+    <dimen name="padding_largeXL">96dp</dimen>
+
+
+    <dimen name="radius_small">4dp</dimen>
+    <dimen name="radius_medium">8dp</dimen>
+    <dimen name="radius_large">16dp</dimen>
+
+    <dimen name="sqr_button">40dp</dimen>
+
+
+    <!---DP-->
+
+    <dimen name="dim_180dp">180dp</dimen>
+    <dimen name="dim_140dp">140dp</dimen>
+    <dimen name="dim_108dp">108dp</dimen>
+    <dimen name="dim_106dp">106dp</dimen>
+    <dimen name="dim_82dp">82dp</dimen>
+    <dimen name="dim_56dp">56dp</dimen>
+    <dimen name="dim_54dp">54dp</dimen>
+    <dimen name="dim_48dp">48dp</dimen>
+    <dimen name="dim_46dp">46dp</dimen>
+    <dimen name="dim_44dp">44dp</dimen>
+    <dimen name="dim_42dp">42dp</dimen>
+    <dimen name="dim_40dp">40dp</dimen>
+    <dimen name="dim_32dp">32dp</dimen>
+    <dimen name="dim_30dp">30dp</dimen>
+    <dimen name="dim_26dp">24dp</dimen>
+    <dimen name="dim_24dp">24dp</dimen>
+    <dimen name="dim_20dp">20dp</dimen>
+    <dimen name="dim_16dp">16dp</dimen>
+    <dimen name="dim_14dp">14dp</dimen>
+    <dimen name="dim_12dp">12dp</dimen>
+    <dimen name="dim_10dp">10dp</dimen>
+    <dimen name="dim_08dp">8dp</dimen>
+    <dimen name="dim_02dp">2dp</dimen>
+    <dimen name="zero">0dp</dimen>
+
+    <!---SP-->
+    <dimen name="ts_11sp">11sp</dimen>
+
+    <dimen name="ts_13sp">13sp</dimen>
+    <dimen name="ts_14sp">14sp</dimen>
+    <dimen name="ts_16sp">16sp</dimen>
+    <dimen name="ts_19sp">19sp</dimen>
+    <dimen name="ts_20sp">20sp</dimen>
+    <dimen name="ts_22sp">22sp</dimen>
+    <dimen name="ts_422sp">422sp</dimen>
+
+    <!---OTHER-->
+    <dimen name="block_weight_1">1</dimen>
+    <dimen name="bias_0.5">0.5</dimen>
+</resources>
