@@ -13,7 +13,6 @@ import com.example.spanishwords.game.presentation.GameViewModel
 import com.example.spanishwords.game.presentation.models.Word
 import com.example.spanishwords.game.presentation.holders.WordsMatchingAdapter
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class WordsMatchingFragment : Fragment(R.layout.words_matching_fragment) {
     private val parentViewModel: GameViewModel by sharedViewModel(

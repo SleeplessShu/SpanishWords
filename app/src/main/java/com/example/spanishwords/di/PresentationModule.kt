@@ -17,6 +17,6 @@ val presentationModule = module {
     }
 
     viewModel {
-        GameViewModel()
+        GameViewModel(get())
     }
 }
