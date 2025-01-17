@@ -16,11 +16,10 @@ interface WordDao {
     @Query("SELECT * FROM A1 WHERE category = :category COLLATE NOCASE LIMIT 36")
     suspend fun getWordsByCategory(category: WordCategory): List<WordEntity>
 
-    @Query("SELECT * FROM A1")
-    suspend fun testing(): List<WordEntity>
+    @Query("SELECT * FROM A1 ORDER BY RANDOM() LIMIT :wordsNeeded")
+    suspend fun getRandom(wordsNeeded: Int): List<WordEntity>
 
-    @Query("SELECT COUNT(*) FROM A1")
-    suspend fun countWords(): Int
+
 
 
     @Update
