@@ -11,7 +11,7 @@ interface DatabaseRepository {
         language1: Language,
         language2: Language,
         level: LanguageLevel,
-        difficultLevel: DifficultLevel,
+        difficultLevel: Int,
         category: WordCategory
     ): List<WordEntity>
 

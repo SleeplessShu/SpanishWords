@@ -5,7 +5,6 @@ import com.example.spanishwords.game.data.database.WordDao
 import com.example.spanishwords.game.domain.models.LanguageLevel
 import com.example.spanishwords.game.domain.models.WordCategory
 import com.example.spanishwords.game.domain.repositories.DatabaseRepository
-import com.example.spanishwords.game.presentation.models.DifficultLevel
 import com.example.spanishwords.game.presentation.models.Language
 
 class DatabaseRepositoryImpl(private val wordDao: WordDao) : DatabaseRepository {
@@ -14,12 +13,12 @@ class DatabaseRepositoryImpl(private val wordDao: WordDao) : DatabaseRepository 
         language1: Language,
         language2: Language,
         level: LanguageLevel,
-        difficultLevel: DifficultLevel,
+        difficultLevel: Int,
         category: WordCategory
     ): List<WordEntity> {
         var dataBaseResponse = emptyList<WordEntity>()
-        if (category == WordCategory.RANDOM) { val wordsNeeded = getDifficultyGrade(difficultLevel)
-           dataBaseResponse = getRandom(wordsNeeded)
+        if (category == WordCategory.RANDOM) {
+           dataBaseResponse = getRandom(difficultLevel)
         } else {
             dataBaseResponse = wordDao.getWordsByCategory(category)
             dataBaseResponse = adaptForConditions(dataBaseResponse, difficultLevel)
@@ -39,33 +38,25 @@ class DatabaseRepositoryImpl(private val wordDao: WordDao) : DatabaseRepository 
 
     private suspend fun adaptForConditions(
         dataBaseResponse: List<WordEntity>,
-        difficultLevel: DifficultLevel
+        difficultLevel: Int
     ): List<WordEntity> {
-        val wordCount = getDifficultyGrade(difficultLevel)
+
         // Перемешиваем элементы
         val shuffledList = dataBaseResponse.shuffled()
 
-        return if (shuffledList.size >= wordCount) {
+        return if (shuffledList.size >= difficultLevel) {
             // Если хватает слов, обрезаем до нужного количества
-            shuffledList.take(wordCount)
+            shuffledList.take(difficultLevel)
         } else {
             // Если слов меньше, запрашиваем недостающие
-            val missingCount = wordCount - shuffledList.size
+            val missingCount = difficultLevel - shuffledList.size
             val additionalWords = getRandom(missingCount)
 
             // Объединяем текущие слова и недостающие
-            (shuffledList + additionalWords).take(wordCount)
+            (shuffledList + additionalWords).take(difficultLevel)
         }
     }
 
-    private fun getDifficultyGrade(difficultLevel: DifficultLevel): Int {
-        return when (difficultLevel) {
-            DifficultLevel.EASY -> 12
-            DifficultLevel.MEDIUM -> 18
-            DifficultLevel.HARD -> 24
-            DifficultLevel.EXPERT -> 48
-            DifficultLevel.SURVIVAL -> 48
-        }
-    }
+
 
 }

@@ -2,7 +2,6 @@ package com.example.spanishwords.game.presentation
 
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,7 +11,9 @@ import com.example.spanishwords.game.domain.api.DatabaseInteractor
 import com.example.spanishwords.game.domain.models.LanguageLevel
 import com.example.spanishwords.game.domain.models.WordCategory
 import com.example.spanishwords.game.presentation.models.DifficultLevel
+import com.example.spanishwords.game.presentation.models.GameSettings
 import com.example.spanishwords.game.presentation.models.GameState
+import com.example.spanishwords.game.presentation.models.IngameWordsState
 import com.example.spanishwords.game.presentation.models.Language
 import com.example.spanishwords.game.presentation.models.MatchState
 import com.example.spanishwords.game.presentation.models.Word
@@ -23,143 +24,126 @@ import java.util.Locale
 import kotlin.random.Random
 
 class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
-    /*
-        private val _wordsPairs = MutableLiveData(
-            listOf(
-                Word("Hola", Language.ENGLISH) to Word("Пока", Language.SPANISH),
-                Word("Adiós", Language.ENGLISH) to Word("Привет", Language.SPANISH),
-                Word("Gracias", Language.ENGLISH) to Word("Пожалуйста", Language.SPANISH),
-                Word("Por favor", Language.ENGLISH) to Word("Спасибо", Language.SPANISH),
-                Word("Buenos días", Language.ENGLISH) to Word("Доброй ночи", Language.SPANISH),
-                Word("Buenas noches", Language.ENGLISH) to Word("Доброе утро", Language.SPANISH)
-            )
-        )
 
-        val wordsPairs: LiveData<List<Pair<Word, Word>>> get() = _wordsPairs
-
-        private val _correctPairs = MutableLiveData(
-            listOf(
-                Word("Hola", Language.ENGLISH) to Word("Привет", Language.SPANISH),
-                Word("Adiós", Language.ENGLISH) to Word("Пока", Language.SPANISH),
-                Word("Gracias", Language.ENGLISH) to Word("Спасибо", Language.SPANISH),
-                Word("Por favor", Language.ENGLISH) to Word("Пожалуйста", Language.SPANISH),
-                Word("Buenos días", Language.ENGLISH) to Word("Доброе утро", Language.SPANISH),
-                Word("Buenas noches", Language.ENGLISH) to Word("Доброй ночи", Language.SPANISH)
-            )
-        )
-
-     */
     private val languages = Language.entries.toTypedArray()
     private val levels = LanguageLevel.entries.toTypedArray()
     private val categories = WordCategory.entries.toTypedArray()
     private val difficult = DifficultLevel.entries.toTypedArray()
 
+    private val _gameState = MutableLiveData<MatchState>(MatchState())
+    val gameState: LiveData<MatchState> get() = _gameState
 
-    private val _selectedLanguage1 = MutableLiveData(Language.RUSSIAN)
-    val selectedLanguage1: LiveData<Language> get() = _selectedLanguage1
+    private val _gameSettings = MutableLiveData(GameSettings())
+    val gameSettings: LiveData<GameSettings> get() = _gameSettings
 
-    private val _selectedLanguage2 = MutableLiveData(Language.SPANISH)
-    val selectedLanguage2: LiveData<Language> get() = _selectedLanguage2
+    private val _ingameWordsState = MutableLiveData(IngameWordsState())
+    val ingameWordsState: LiveData<IngameWordsState> get() = _ingameWordsState
 
-    private val _selectedLanguageLevel = MutableLiveData(LanguageLevel.A1)
-    val selectedLanguageLevel: LiveData<LanguageLevel> get() = _selectedLanguageLevel
+    //private val _correctPairs = MutableLiveData<List<Pair<Word, Word>>>()
+    //val correctPairs: LiveData<List<Pair<Word, Word>>> get() = _correctPairs
 
-    private val _selectedCategory = MutableLiveData(WordCategory.RANDOM)
-    val selectedCategory: LiveData<WordCategory> get() = _selectedCategory
+    private var score: Int = 0
+    private var lives: Int = 3
+    private var difficultLevel: Int = 18
+    private val digitsInScore: Int = 10
+    private var correctGuessesCounter: Int = 0
 
-    private val _selectedDifficult = MutableLiveData(DifficultLevel.MEDIUM)
-    val selectedDifficult: LiveData<DifficultLevel> get() = _selectedDifficult
+    private val handler: Handler = Handler(Looper.getMainLooper())
+    private var selectedList: List<Word> = emptyList()
 
+
+    //private var correctPairList: MutableList<Pair<Word, Word>> = mutableListOf()
     private val _wordsPairs = MutableLiveData<List<Pair<Word, Word>>>()
     val wordsPairs: LiveData<List<Pair<Word, Word>>> get() = _wordsPairs
 
-    private val _correctPairs = MutableLiveData<List<Pair<Word, Word>>>()
-    val correctPairs: LiveData<List<Pair<Word, Word>>> get() = _correctPairs
+    //private val _selectedWords = MutableLiveData<List<Word>>()
+    //val selectedWords: LiveData<List<Word>> get() = _selectedWords
 
-    private var score: Int = 0
-    private var livesCount: Int = 3
-    private val digitsInScore: Int = 10
+    //private val _errorWords = MutableLiveData<List<Word>>()
+    //val errorWords: LiveData<List<Word>> get() = _errorWords
 
-    private val handler: Handler = Handler(Looper.getMainLooper())
+    //private val _correctWords = MutableLiveData<List<Word>>()
+    //val correctWords: LiveData<List<Word>> get() = _correctWords
 
-    private val selectedList = mutableListOf<Word>()
-    private var correctPairList: MutableList<Pair<Word, Word>> = mutableListOf()
-
-    private val _selectedWords = MutableLiveData<List<Word>>()
-    val selectedWords: LiveData<List<Word>> get() = _selectedWords
-
-    private val _errorWords = MutableLiveData<List<Word>>()
-    val errorWords: LiveData<List<Word>> get() = _errorWords
-
-    private val _correctWords = MutableLiveData<List<Word>>()
-    val correctWords: LiveData<List<Word>> get() = _correctWords
-
-    private val _usedWords = MutableLiveData<List<Word>>()
-    val usedWords: LiveData<List<Word>> get() = _usedWords
-
-
-    private val _gameState = MutableLiveData<MatchState>(MatchState())
-    val gameState: LiveData<MatchState> get() = _gameState
+    //private val _usedWords = MutableLiveData<List<Word>>()
+    //val usedWords: LiveData<List<Word>> get() = _usedWords
 
 
     init {
         onMatchSettings()
-
     }
     //MATCH SETTINGS
 
     // Переключение языка для первой группы
     fun switchLanguage1(isNext: Boolean) {
-        val currentIndex = languages.indexOf(_selectedLanguage1.value)
+        val currentIndex = languages.indexOf(_gameSettings.value?.language1)
         val nextIndex =
             if (isNext) (currentIndex + 1) % languages.size else (currentIndex - 1 + languages.size) % languages.size
 
-        // Проверка на совпадение со второй группой
-        if (languages[nextIndex] == _selectedLanguage2.value) {
+        if (languages[nextIndex] == _gameSettings.value?.language2) {
             val adjustedIndex = (nextIndex + 1) % languages.size
-            _selectedLanguage1.value = languages[adjustedIndex]
+            updateLanguage1(languages[adjustedIndex])
         } else {
-            _selectedLanguage1.value = languages[nextIndex]
+            updateLanguage1(languages[nextIndex])
         }
     }
 
     // Переключение языка для второй группы
     fun switchLanguage2(isNext: Boolean) {
-        val currentIndex = languages.indexOf(_selectedLanguage2.value)
+        val currentIndex = languages.indexOf(_gameSettings.value?.language2)
         val nextIndex =
             if (isNext) (currentIndex + 1) % languages.size else (currentIndex - 1 + languages.size) % languages.size
 
-        // Проверка на совпадение с первой группой
-        if (languages[nextIndex] == _selectedLanguage1.value) {
+        if (languages[nextIndex] == _gameSettings.value?.language1) {
             val adjustedIndex = (nextIndex + 1) % languages.size
-            _selectedLanguage2.value = languages[adjustedIndex]
+            updateLanguage2(languages[adjustedIndex])
         } else {
-            _selectedLanguage2.value = languages[nextIndex]
+            updateLanguage2(languages[nextIndex])
         }
     }
 
     //Переключение уровня языка
     fun switchWordsLevel(isNext: Boolean) {
-        val currentIndex = levels.indexOf(_selectedLanguageLevel.value)
+        val currentIndex = levels.indexOf(_gameSettings.value?.level)
         val nextIndex =
             if (isNext) (currentIndex + 1) % levels.size else (currentIndex - +levels.size) % levels.size
-        _selectedLanguageLevel.value = levels[nextIndex]
+        updateLevel(levels[nextIndex])
     }
 
     //Переключение сложности
     fun switchDifficultLevel(isNext: Boolean) {
-        val currentIndex = difficult.indexOf(_selectedDifficult.value)
+        val currentIndex = difficult.indexOf(_gameSettings.value?.difficult)
         val nextIndex =
             if (isNext) (currentIndex + 1) % difficult.size else (currentIndex - +difficult.size) % difficult.size
-        _selectedDifficult.value = difficult[nextIndex]
+        updateDifficult(difficult[nextIndex])
     }
 
     //Переключение категории слов
     fun switchWordsCathegory(isNext: Boolean) {
-        val currentIndex = categories.indexOf(_selectedCategory.value)
+        val currentIndex = categories.indexOf(_gameSettings.value?.category)
         val nextIndex =
             if (isNext) (currentIndex + 1) % categories.size else (currentIndex - +categories.size) % categories.size
-        _selectedCategory.value = categories[nextIndex]
+        updateCategory(categories[nextIndex])
+    }
+
+    fun updateLanguage1(newLanguage: Language) {
+        _gameSettings.value = _gameSettings.value?.copy(language1 = newLanguage)
+    }
+
+    fun updateLanguage2(newLanguage: Language) {
+        _gameSettings.value = _gameSettings.value?.copy(language2 = newLanguage)
+    }
+
+    fun updateLevel(newLevel: LanguageLevel) {
+        _gameSettings.value = _gameSettings.value?.copy(level = newLevel)
+    }
+
+    fun updateCategory(newCategory: WordCategory) {
+        _gameSettings.value = _gameSettings.value?.copy(category = newCategory)
+    }
+
+    fun updateDifficult(newDifficult: DifficultLevel) {
+        _gameSettings.value = _gameSettings.value?.copy(difficult = newDifficult)
     }
 
     //GAME
@@ -173,13 +157,20 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
 
 
     private fun addInSelectedList(clickedWord: Word) {
-        selectedList.add(clickedWord)
-        _selectedWords.value = selectedList.toList()
+        _ingameWordsState.value = _ingameWordsState.value?.copy(
+            selectedWords = _ingameWordsState.value?.selectedWords.orEmpty() + clickedWord
+        )
     }
 
     private fun replaceInSelectedList(clickedWord: Word) {
-        selectedList[0] = clickedWord
-        _selectedWords.value = selectedList.toList()
+        val updatedList = _ingameWordsState.value?.selectedWords.orEmpty().toMutableList().apply {
+            if (isNotEmpty()) {
+                this[0] = clickedWord
+            }
+        }
+        _ingameWordsState.value = _ingameWordsState.value?.copy(
+            selectedWords = updatedList
+        )
     }
 
 
@@ -188,7 +179,8 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
         val second = pair[1]
         if (isMatchingPair(first, second)) {
             reactOnCorrect()
-            updateCorrectWordsList(first, second)
+            correctGuessesCounter++
+            updateCorrectWordsList(first,second)
         } else {
             updateErrorList(first, second)
             reactOnError()
@@ -198,13 +190,13 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
     }
 
     private fun endGameCheck() {
-        if (livesCount <= 0) {
+        if (lives <= 0) {
             handler.postDelayed(
                 {
                     onGameEnd()
                 }, 1000
             )
-        } else if (_correctPairs.value?.size == correctPairList.size) {
+        } else if (correctGuessesCounter == difficultLevel) {
             onGameEnd()
         }
     }
@@ -213,7 +205,7 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
         removeScoreAndLive()
         _gameState.postValue(
             _gameState.value?.copy(
-                lives = livesCount, score = getScoreAsString(score)
+                lives = lives, score = getScoreAsString(score)
             )
         )
     }
@@ -222,7 +214,7 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
         addScoreAndLive()
         _gameState.postValue(
             _gameState.value?.copy(
-                lives = livesCount, score = getScoreAsString(score)
+                lives = lives, score = getScoreAsString(score)
             )
         )
     }
@@ -230,8 +222,8 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
 
     private fun addScoreAndLive() {
         score += CORRECT_ANSWER_PRICE
-        if (livesCount < 3) {
-            livesCount++
+        if (lives < 3) {
+            lives++
         }
     }
 
@@ -240,66 +232,79 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
     }
 
     private fun clearSelectedList() {
-        _selectedWords.value = emptyList()
-        selectedList.clear()
+        _ingameWordsState.value?.copy(selectedWords = emptyList())
     }
 
     private fun isSameLanguage(clickedWord: Word) {
-        if (selectedList[0].language == clickedWord.language) {
+        if (selectedList[0].language == clickedWord.language){
+            if (isSameWord(clickedWord)) {
             replaceInSelectedList(clickedWord)
+            } else {
+                selectedList = emptyList<Word>()
+            }
         } else {
             addInSelectedList(clickedWord)
             checkPair(selectedList)
         }
     }
-
-    private fun updateCorrectWordsList(first: Word, second: Word) {
-        _selectedWords.value = emptyList()
-        val updatedCorrectWordsList = _correctWords.value.orEmpty().toMutableList().apply {
-            add(first)
-            add(second)
-        }
-        correctPairList.apply {
-            add(Pair(first, second))
-        }
-        _correctWords.value = updatedCorrectWordsList
-        updateUsedWordsList(first, second)
+    private fun isSameWord(clickedWord: Word): Boolean {
+        return selectedList.isNotEmpty() && clickedWord.id == selectedList[0].id
     }
 
-    private fun updateUsedWordsList(first: Word, second: Word) {
-        handler.postDelayed({
-            val updatedUsedWordsList = _usedWords.value.orEmpty().toMutableList().apply {
+        private fun updateCorrectWordsList(first: Word, second: Word) {
+
+            val updatedCorrectWordsList = _ingameWordsState.value?.correctWords.orEmpty().toMutableList().apply {
                 add(first)
                 add(second)
             }
-            _correctWords.value = emptyList()
-            _usedWords.value = updatedUsedWordsList
+            /*
+            correctPairList.apply {
+                add(Pair(first, second))
+            }
+
+             */
+            updateUsedWordsList(first, second)
+            _ingameWordsState.value = _ingameWordsState.value?.copy(
+                selectedWords = emptyList(),
+                correctWords = updatedCorrectWordsList
+                )
+        }
+
+
+    private fun updateUsedWordsList(first: Word, second: Word) {
+        handler.postDelayed({
+            val updatedUsedWordsList =
+                _ingameWordsState.value?.usedWords.orEmpty().toMutableList().apply {
+                    add(first)
+                    add(second)
+                }
+            _ingameWordsState.value = _ingameWordsState.value?.copy(
+                correctWords = emptyList(), usedWords = updatedUsedWordsList
+            )
+
         }, DELAY_BUTTON_REACTION)
     }
 
     private fun isMatchingPair(first: Word, second: Word): Boolean {
-        return (first.id == second.id)/*
-        return (_correctPairs.value?.any {
-            (it.first == first && it.second == second) || (it.first == second && it.second == first)
-        } == true)
+        return (first.id == second.id)
 
-         */
     }
 
     private fun updateErrorList(first: Word, second: Word) {
-        _selectedWords.value = emptyList()
-        _errorWords.value = listOf(first, second)
+        _ingameWordsState.value?.copy(
+            selectedWords = emptyList(), errorWords = listOf(first, second)
+        )
         clearErrorList()
     }
 
     private fun clearErrorList() {
         handler.postDelayed({
-            _errorWords.value = emptyList()
+            _ingameWordsState.value = _ingameWordsState.value?.copy(errorWords = emptyList())
         }, DELAY_BUTTON_REACTION)
     }
 
     private fun removeScoreAndLive() {
-        livesCount--
+        lives--
         score -= MISTAKE_PRICE
 
     }
@@ -315,11 +320,13 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
     }
 
     fun onGame() {
-        loadWordsFromDatabase()
+
         onLoading()
         handler.postDelayed({
             _gameState.value = _gameState.value?.copy(state = GameState.GAME)
         }, DELAY_LOADING)
+        setupScoreLivesDifficult()
+        loadWordsFromDatabase()
 
     }
 
@@ -327,9 +334,8 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
         onLoading()
         handler.postDelayed({
             _gameState.value = _gameState.value?.copy(
-                state = GameState.END_OF_GAME, lives = livesCount
+                state = GameState.END_OF_GAME, lives = lives
             )
-
         }, DELAY_LOADING)
     }
 
@@ -339,31 +345,38 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
     }
 
     private fun resetMatchStats() {
-        _selectedWords.value = emptyList()
-        _errorWords.value = emptyList()
-        _usedWords.value = emptyList()
-        correctPairList = mutableListOf()
-        livesCount = 3
+        _ingameWordsState.value = _ingameWordsState.value?.copy(
+            selectedWords = emptyList(), errorWords = emptyList(), usedWords = emptyList()
+        )
+    }
+
+    private fun setupScoreLivesDifficult() {
         score = 0
+        difficultLevel = getGameDifficult(_gameSettings.value?.difficult ?: DifficultLevel.MEDIUM)
+        lives = getLivesCount(_gameSettings.value?.difficult ?: DifficultLevel.MEDIUM)
     }
 
     private fun loadWordsFromDatabase() {
         viewModelScope.launch {
             val wordsList = repository.getWordsPack(
-                _selectedLanguage1.value!!,
-                _selectedLanguage2.value!!,
-                _selectedLanguageLevel.value!!,
-                _selectedDifficult.value!!,
-                _selectedCategory.value!!
+                _gameSettings.value?.language1 ?: Language.ENGLISH,
+                _gameSettings.value?.language2 ?: Language.SPANISH,
+                _gameSettings.value?.level ?: LanguageLevel.A1,
+                difficultLevel,
+                _gameSettings.value?.category ?: WordCategory.RANDOM
             )
-            val correctPairsList = wordsList.map { wordEntity ->
+            val pairsList = wordsList.map { wordEntity ->
                 toWordPair(
-                    wordEntity, _selectedLanguage1.value!!, _selectedLanguage2.value!!
+                    wordEntity,
+                    _gameSettings.value?.language1 ?: Language.ENGLISH,
+                    _gameSettings.value?.language2 ?: Language.SPANISH
                 )
             }
-            Log.d("DEBUG", "loadWordsFromDatabase: ${correctPairsList}")
-            _wordsPairs.value = shufflePairs(correctPairsList)
-            _correctPairs.value = correctPairsList
+
+
+            _wordsPairs.value = shufflePairs(pairsList)
+
+
         }
     }
 
@@ -413,6 +426,26 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
     private fun getCurrentDate(): String {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         return dateFormat.format(Date())
+    }
+
+    private fun getGameDifficult(difficultLevel: DifficultLevel): Int {
+        return when (difficultLevel) {
+            DifficultLevel.EASY -> 12
+            DifficultLevel.MEDIUM -> 18
+            DifficultLevel.HARD -> 24
+            DifficultLevel.EXPERT -> 48
+            DifficultLevel.SURVIVAL -> 48
+        }
+    }
+
+    private fun getLivesCount(difficultLevel: DifficultLevel): Int {
+        return when (difficultLevel) {
+            DifficultLevel.EASY -> 3
+            DifficultLevel.MEDIUM -> 3
+            DifficultLevel.HARD -> 2
+            DifficultLevel.EXPERT -> 1
+            DifficultLevel.SURVIVAL -> 1
+        }
     }
 
 

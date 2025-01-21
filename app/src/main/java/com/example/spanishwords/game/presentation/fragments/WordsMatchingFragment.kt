@@ -54,19 +54,11 @@ class WordsMatchingFragment : Fragment(R.layout.words_matching_fragment) {
             adapter.updateWordsList(wordsPairs)
         }
 
-        parentViewModel.selectedWords.observe(viewLifecycleOwner) { selectedWords ->
-            adapter.updateSelectedWords(selectedWords)
-        }
-
-        parentViewModel.errorWords.observe(viewLifecycleOwner) { errorWords ->
-            adapter.updateErrorWords(errorWords)
-        }
-        parentViewModel.correctWords.observe(viewLifecycleOwner) { correctWords ->
-            adapter.updateCorrectWords(correctWords)
-        }
-
-        parentViewModel.usedWords.observe(viewLifecycleOwner) { usedWords ->
-            adapter.updateUsedWords(usedWords)
+        parentViewModel.ingameWordsState.observe(viewLifecycleOwner) { ingameWordState ->
+            adapter.updateSelectedWords(ingameWordState.selectedWords)
+            adapter.updateErrorWords(ingameWordState.errorWords)
+            adapter.updateCorrectWords(ingameWordState.correctWords)
+            adapter.updateUsedWords(ingameWordState.usedWords)
         }
         parentViewModel.gameState.observe(viewLifecycleOwner) { gameState ->
             binding.tvScores.setText(gameState.score)

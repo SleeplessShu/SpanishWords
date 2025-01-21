@@ -38,24 +38,12 @@ class MatchSettingsFragment : Fragment(R.layout.match_settings_fragment) {
     private fun setupObservers(){
 
         // Подписка на изменения LiveData
-        parentViewModel.selectedLanguage1.observe(viewLifecycleOwner, Observer { language ->
-            binding.tvFirstLanguage.text = language.name
-        })
-
-        parentViewModel.selectedLanguage2.observe(viewLifecycleOwner, Observer { language ->
-            binding.tvSecondLanguage.text = language.name
-        })
-
-        parentViewModel.selectedLanguageLevel.observe(viewLifecycleOwner, Observer { level ->
-            binding.tvWordsLevel.text = level.name
-        })
-
-        parentViewModel.selectedDifficult.observe(viewLifecycleOwner, Observer { difficult ->
-            binding.tvDifficult.text = difficult.name
-        })
-
-        parentViewModel.selectedCategory.observe(viewLifecycleOwner, Observer { category ->
-            binding.tvWordsCategory.text = category.name
+        parentViewModel.gameSettings.observe(viewLifecycleOwner, Observer { settings ->
+            binding.tvFirstLanguage.text = settings.language1.toString()
+            binding.tvSecondLanguage.text = settings.language2.toString()
+            binding.tvWordsLevel.text = settings.level.toString()
+            binding.tvDifficult.text = settings.difficult.toString()
+            binding.tvWordsCategory.text = settings.category.toString()
         })
 
         binding.bNewGame.setOnClickListener {

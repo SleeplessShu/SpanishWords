@@ -12,7 +12,7 @@ class DatabaseInteractorImpl(private val database: DatabaseRepository): Database
     override suspend fun getWordsPack(language1: Language,
                                       language2: Language,
                                       level: LanguageLevel,
-                                      difficultLevel: DifficultLevel,
+                                      difficultLevel: Int,
                                       category: WordCategory
     ): List<WordEntity> {
         return database.getWordsPack(
