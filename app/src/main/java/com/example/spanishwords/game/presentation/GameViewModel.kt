@@ -2,6 +2,7 @@ package com.example.spanishwords.game.presentation
 
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,6 +22,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.log
 import kotlin.random.Random
 
 class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
@@ -39,9 +41,6 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
     private val _ingameWordsState = MutableLiveData(IngameWordsState())
     val ingameWordsState: LiveData<IngameWordsState> get() = _ingameWordsState
 
-    //private val _correctPairs = MutableLiveData<List<Pair<Word, Word>>>()
-    //val correctPairs: LiveData<List<Pair<Word, Word>>> get() = _correctPairs
-
     private var score: Int = 0
     private var lives: Int = 3
     private var difficultLevel: Int = 18
@@ -49,25 +48,10 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
     private var correctGuessesCounter: Int = 0
 
     private val handler: Handler = Handler(Looper.getMainLooper())
-    private var selectedList: List<Word> = emptyList()
+    //private var selectedList: List<Word> = emptyList()
 
-
-    //private var correctPairList: MutableList<Pair<Word, Word>> = mutableListOf()
     private val _wordsPairs = MutableLiveData<List<Pair<Word, Word>>>()
     val wordsPairs: LiveData<List<Pair<Word, Word>>> get() = _wordsPairs
-
-    //private val _selectedWords = MutableLiveData<List<Word>>()
-    //val selectedWords: LiveData<List<Word>> get() = _selectedWords
-
-    //private val _errorWords = MutableLiveData<List<Word>>()
-    //val errorWords: LiveData<List<Word>> get() = _errorWords
-
-    //private val _correctWords = MutableLiveData<List<Word>>()
-    //val correctWords: LiveData<List<Word>> get() = _correctWords
-
-    //private val _usedWords = MutableLiveData<List<Word>>()
-    //val usedWords: LiveData<List<Word>> get() = _usedWords
-
 
     init {
         onMatchSettings()
@@ -148,41 +132,65 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
 
     //GAME
     fun onWordClick(clickedWord: Word) {
-        when (selectedList.size) {
+        val selectedWords = _ingameWordsState.value?.selectedWords.orEmpty()
+        when (selectedWords.size) {
             0 -> addInSelectedList(clickedWord)
-            1 -> isSameLanguage(clickedWord)
-            2 -> checkPair(selectedList)
+            1 -> {
+                if (isSameWord(clickedWord)) {
+                    clearSelectedList()
+                    Log.d("missing_spot", "onWordClick: 1-if")
+                } else if (isSameLanguage(clickedWord)) {
+                    Log.d("missing_spot", "onWordClick: 1-elseif")
+                    replaceInSelectedList(clickedWord)
+
+                } else {
+                    Log.d("missing_spot", "onWordClick: 1-else")
+                    addInSelectedList(clickedWord)
+                    checkPair(_ingameWordsState.value!!.selectedWords)
+                }
+            }
+
+            else -> clearSelectedList()
         }
     }
 
-
     private fun addInSelectedList(clickedWord: Word) {
+        val updatedSelectedWords = _ingameWordsState.value?.selectedWords.orEmpty() + clickedWord
         _ingameWordsState.value = _ingameWordsState.value?.copy(
-            selectedWords = _ingameWordsState.value?.selectedWords.orEmpty() + clickedWord
+            selectedWords = updatedSelectedWords
         )
     }
 
+    private fun isSameLanguage(clickedWord: Word): Boolean {
+        return (_ingameWordsState.value!!.selectedWords[0].language == clickedWord.language && _ingameWordsState.value!!.selectedWords[0].id != clickedWord.id)
+    }
+
+    private fun isSameWord(clickedWord: Word): Boolean {
+        return _ingameWordsState.value!!.selectedWords.isNotEmpty() && clickedWord.id == _ingameWordsState.value!!.selectedWords[0].id && clickedWord.language == _ingameWordsState.value!!.selectedWords[0].language
+    }
+
     private fun replaceInSelectedList(clickedWord: Word) {
-        val updatedList = _ingameWordsState.value?.selectedWords.orEmpty().toMutableList().apply {
-            if (isNotEmpty()) {
-                this[0] = clickedWord
+        val updatedSelectedWords =
+            _ingameWordsState.value?.selectedWords.orEmpty().toMutableList().apply {
+                if (isNotEmpty()) {
+                    this[0] = clickedWord
+                }
             }
-        }
         _ingameWordsState.value = _ingameWordsState.value?.copy(
-            selectedWords = updatedList
+            selectedWords = updatedSelectedWords
         )
     }
 
 
     private fun checkPair(pair: List<Word>) {
-        val first = pair[0]
-        val second = pair[1]
-        if (isMatchingPair(first, second)) {
+        Log.d("DEBUG", "!!!checkPair: ${pair[0]}, ${pair[1]}")
+        if (isMatchingPair(pair[0], pair[1])) {
             reactOnCorrect()
             correctGuessesCounter++
-            updateCorrectWordsList(first,second)
+            updateCorrectWordsList(pair[0], pair[1])
+            Log.d("DEBUG", "checkPair: ISCORRECT")
         } else {
-            updateErrorList(first, second)
+            updateErrorList(pair[0], pair[1])
             reactOnError()
         }
         endGameCheck()
@@ -222,7 +230,7 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
 
     private fun addScoreAndLive() {
         score += CORRECT_ANSWER_PRICE
-        if (lives < 3) {
+        if (lives < 3 && _gameSettings.value?.difficult != DifficultLevel.SURVIVAL) {
             lives++
         }
     }
@@ -232,56 +240,35 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
     }
 
     private fun clearSelectedList() {
-        _ingameWordsState.value?.copy(selectedWords = emptyList())
+        _ingameWordsState.value = _ingameWordsState.value?.copy(
+            selectedWords = emptyList()
+        )
     }
 
-    private fun isSameLanguage(clickedWord: Word) {
-        if (selectedList[0].language == clickedWord.language){
-            if (isSameWord(clickedWord)) {
-            replaceInSelectedList(clickedWord)
-            } else {
-                selectedList = emptyList<Word>()
-            }
-        } else {
-            addInSelectedList(clickedWord)
-            checkPair(selectedList)
+
+    private fun updateCorrectWordsList(first: Word, second: Word) {
+
+        val newState = _ingameWordsState.value?.correctWords.orEmpty().toMutableList().apply {
+            add(first)
+            add(second)
         }
+        clearSelectedList()
+        _ingameWordsState.value = _ingameWordsState.value?.copy(correctWords = newState)
+        Log.d("DEBUG", "updateCorrectWordsList: ${newState}")
+        updateUsedWordsList(first, second)
     }
-    private fun isSameWord(clickedWord: Word): Boolean {
-        return selectedList.isNotEmpty() && clickedWord.id == selectedList[0].id
-    }
-
-        private fun updateCorrectWordsList(first: Word, second: Word) {
-
-            val updatedCorrectWordsList = _ingameWordsState.value?.correctWords.orEmpty().toMutableList().apply {
-                add(first)
-                add(second)
-            }
-            /*
-            correctPairList.apply {
-                add(Pair(first, second))
-            }
-
-             */
-            updateUsedWordsList(first, second)
-            _ingameWordsState.value = _ingameWordsState.value?.copy(
-                selectedWords = emptyList(),
-                correctWords = updatedCorrectWordsList
-                )
-        }
 
 
     private fun updateUsedWordsList(first: Word, second: Word) {
+        val currentState = _ingameWordsState.value ?: return
         handler.postDelayed({
-            val updatedUsedWordsList =
-                _ingameWordsState.value?.usedWords.orEmpty().toMutableList().apply {
-                    add(first)
-                    add(second)
-                }
-            _ingameWordsState.value = _ingameWordsState.value?.copy(
+            val updatedUsedWordsList = currentState.usedWords.toMutableList().apply {
+                add(first)
+                add(second)
+            }
+            _ingameWordsState.value = currentState.copy(
                 correctWords = emptyList(), usedWords = updatedUsedWordsList
             )
-
         }, DELAY_BUTTON_REACTION)
     }
 
@@ -291,9 +278,10 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
     }
 
     private fun updateErrorList(first: Word, second: Word) {
-        _ingameWordsState.value?.copy(
+        val newState = _ingameWordsState.value?.copy(
             selectedWords = emptyList(), errorWords = listOf(first, second)
         )
+        _ingameWordsState.value = newState
         clearErrorList()
     }
 

@@ -1,6 +1,7 @@
 package com.example.spanishwords.game.presentation.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -55,6 +56,11 @@ class WordsMatchingFragment : Fragment(R.layout.words_matching_fragment) {
         }
 
         parentViewModel.ingameWordsState.observe(viewLifecycleOwner) { ingameWordState ->
+            Log.d("DEBUG", "setupObservers:\n" +
+                    "selected ${ingameWordState.selectedWords}\n" +
+                    "correct ${ingameWordState.correctWords}\n" +
+                    "used ${ingameWordState.usedWords}\n" +
+                    "error ${ingameWordState.errorWords} ")
             adapter.updateSelectedWords(ingameWordState.selectedWords)
             adapter.updateErrorWords(ingameWordState.errorWords)
             adapter.updateCorrectWords(ingameWordState.correctWords)
