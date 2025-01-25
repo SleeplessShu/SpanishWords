@@ -46,9 +46,10 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
     private var difficultLevel: Int = 18
     private val digitsInScore: Int = 10
     private var correctGuessesCounter: Int = 0
-
+    private val pageSize = 6
+    private var pairsFromDatabase: List<Pair<Word,Word>> = emptyList()
+    private var currentPage = 0
     private val handler: Handler = Handler(Looper.getMainLooper())
-    //private var selectedList: List<Word> = emptyList()
 
     private val _wordsPairs = MutableLiveData<List<Pair<Word, Word>>>()
     val wordsPairs: LiveData<List<Pair<Word, Word>>> get() = _wordsPairs
@@ -198,16 +199,16 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
     }
 
     private fun endGameCheck() {
-        if (lives <= 0) {
-            handler.postDelayed(
-                {
-                    onGameEnd()
-                }, 1000
-            )
-        } else if (correctGuessesCounter == difficultLevel) {
+        val totalPairs = pairsFromDatabase.size
+        val answeredPairs = currentPage * pageSize + correctGuessesCounter
+
+        if (lives <= 0 || answeredPairs >= totalPairs) {
             onGameEnd()
+        } else if (correctGuessesCounter == pageSize) {
+            onPageCompleted()
         }
     }
+
 
     private fun reactOnError() {
         removeScoreAndLive()
@@ -308,15 +309,16 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
     }
 
     fun onGame() {
-
         onLoading()
-        handler.postDelayed({
-            _gameState.value = _gameState.value?.copy(state = GameState.GAME)
-        }, DELAY_LOADING)
         setupScoreLivesDifficult()
-        loadWordsFromDatabase()
-
+        loadWordsFromDatabase {
+            loadNextPage()
+            handler.postDelayed({
+                _gameState.value = _gameState.value?.copy(state = GameState.GAME)
+            }, DELAY_LOADING)
+        }
     }
+
 
     fun onGameEnd() {
         onLoading()
@@ -340,11 +342,14 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
 
     private fun setupScoreLivesDifficult() {
         score = 0
+        correctGuessesCounter = 0
+        currentPage = 0
         difficultLevel = getGameDifficult(_gameSettings.value?.difficult ?: DifficultLevel.MEDIUM)
         lives = getLivesCount(_gameSettings.value?.difficult ?: DifficultLevel.MEDIUM)
     }
 
-    private fun loadWordsFromDatabase() {
+
+    private fun loadWordsFromDatabase(onSuccess: () -> Unit) {
         viewModelScope.launch {
             val wordsList = repository.getWordsPack(
                 _gameSettings.value?.language1 ?: Language.ENGLISH,
@@ -353,7 +358,12 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
                 difficultLevel,
                 _gameSettings.value?.category ?: WordCategory.RANDOM
             )
-            val pairsList = wordsList.map { wordEntity ->
+            if (wordsList.isEmpty()) {
+                onGameEnd() // Если список пуст, завершаем игру.
+                return@launch
+            }
+
+            pairsFromDatabase = wordsList.map { wordEntity ->
                 toWordPair(
                     wordEntity,
                     _gameSettings.value?.language1 ?: Language.ENGLISH,
@@ -361,10 +371,16 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
                 )
             }
 
+            currentPage = 0
+            onSuccess()
+        }
+    }
 
-            _wordsPairs.value = shufflePairs(pairsList)
-
-
+    fun onPageCompleted() {
+        if (currentPage * pageSize < pairsFromDatabase.size) {
+            loadNextPage()
+        } else {
+            onGameEnd()
         }
     }
 
@@ -399,7 +415,7 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
 
         return shuffledPairs
     }
-
+/*
     private fun updateWordStats(wordEntity: WordEntity, isCorrect: Boolean) {
         val updatedWord = wordEntity.copy(
             correct = if (isCorrect) wordEntity.correct + 1 else wordEntity.correct,
@@ -411,11 +427,54 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
         }
     }
 
+ */
+
     private fun getCurrentDate(): String {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         return dateFormat.format(Date())
     }
 
+    fun loadNextPage() {
+        if (currentPage * pageSize >= pairsFromDatabase.size) {
+            onGameEnd()
+            return
+        }
+
+        val nextPagePairs = getCurrentPagePairs()
+        if (nextPagePairs.isNotEmpty()) {
+            _ingameWordsState.value = _ingameWordsState.value?.copy(
+                selectedWords = emptyList(),
+                errorWords = emptyList(),
+                correctWords = emptyList(),
+                usedWords = emptyList()
+            )
+            correctGuessesCounter = 0
+            _wordsPairs.value = shufflePairs(nextPagePairs)
+            currentPage++
+        } else {
+            onGameEnd()
+        }
+    }
+
+
+    private fun getCurrentPagePairs(): List<Pair<Word, Word>> {
+        val fromIndex = currentPage * pageSize
+        val toIndex = (fromIndex + pageSize).coerceAtMost(pairsFromDatabase.size)
+        return if (fromIndex < toIndex) {
+            pairsFromDatabase.subList(fromIndex, toIndex)
+        } else {
+            emptyList()
+        }
+    }
+
+    /*
+    private fun getPagesCount(): Int{
+        val pagesCount = getGameDifficult(_gameSettings.value!!.difficult) / 6
+        return pagesCount
+    }
+
+
+     */
     private fun getGameDifficult(difficultLevel: DifficultLevel): Int {
         return when (difficultLevel) {
             DifficultLevel.EASY -> 12
