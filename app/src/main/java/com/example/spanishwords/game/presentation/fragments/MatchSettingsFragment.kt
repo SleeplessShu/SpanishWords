@@ -79,10 +79,10 @@ class MatchSettingsFragment : Fragment(R.layout.match_settings_fragment) {
         }
 
         binding.blWordsCategory.setOnClickListener{
-            parentViewModel.switchWordsCathegory(isNext = false)
+            parentViewModel.switchWordsCategory(isNext = false)
         }
         binding.brWordsCategory.setOnClickListener {
-            parentViewModel.switchWordsCathegory(isNext = true)
+            parentViewModel.switchWordsCategory(isNext = true)
         }
 
 

@@ -7,8 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.spanishwords.game.data.WordEntity
-import com.example.spanishwords.game.domain.api.DatabaseInteractor
+import com.example.spanishwords.game.domain.api.GameInteractor
 import com.example.spanishwords.game.domain.models.LanguageLevel
 import com.example.spanishwords.game.domain.models.WordCategory
 import com.example.spanishwords.game.presentation.models.DifficultLevel
@@ -18,14 +17,17 @@ import com.example.spanishwords.game.presentation.models.IngameWordsState
 import com.example.spanishwords.game.presentation.models.Language
 import com.example.spanishwords.game.presentation.models.MatchState
 import com.example.spanishwords.game.presentation.models.Word
+import com.example.spanishwords.utils.SupportFunctions
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.math.log
-import kotlin.random.Random
 
-class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
+class GameViewModel(
+    //private val repository: DatabaseInteractor,
+    private val gameInteractor: GameInteractor,
+    private val supportFunctions: SupportFunctions,
+) : ViewModel() {
 
     private val languages = Language.entries.toTypedArray()
     private val levels = LanguageLevel.entries.toTypedArray()
@@ -47,7 +49,7 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
     private val digitsInScore: Int = 10
     private var correctGuessesCounter: Int = 0
     private val pageSize = 6
-    private var pairsFromDatabase: List<Pair<Word,Word>> = emptyList()
+    private var pairsFromDatabase: List<Pair<Word, Word>> = emptyList()
     private var currentPage = 0
     private val handler: Handler = Handler(Looper.getMainLooper())
 
@@ -61,54 +63,44 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
 
     // Переключение языка для первой группы
     fun switchLanguage1(isNext: Boolean) {
-        val currentIndex = languages.indexOf(_gameSettings.value?.language1)
-        val nextIndex =
-            if (isNext) (currentIndex + 1) % languages.size else (currentIndex - 1 + languages.size) % languages.size
-
-        if (languages[nextIndex] == _gameSettings.value?.language2) {
-            val adjustedIndex = (nextIndex + 1) % languages.size
-            updateLanguage1(languages[adjustedIndex])
+        val nextLanguage =
+            supportFunctions.switchItem(_gameSettings.value?.language1, languages, isNext)
+        if (nextLanguage == _gameSettings.value?.language2) {
+            val adjustedLanguage = supportFunctions.switchItem(nextLanguage, languages, isNext)
+            updateLanguage1(adjustedLanguage)
         } else {
-            updateLanguage1(languages[nextIndex])
+            updateLanguage1(nextLanguage)
         }
     }
 
     // Переключение языка для второй группы
     fun switchLanguage2(isNext: Boolean) {
-        val currentIndex = languages.indexOf(_gameSettings.value?.language2)
-        val nextIndex =
-            if (isNext) (currentIndex + 1) % languages.size else (currentIndex - 1 + languages.size) % languages.size
-
-        if (languages[nextIndex] == _gameSettings.value?.language1) {
-            val adjustedIndex = (nextIndex + 1) % languages.size
-            updateLanguage2(languages[adjustedIndex])
+        val nextLanguage =
+            supportFunctions.switchItem(_gameSettings.value?.language2, languages, isNext)
+        if (nextLanguage == _gameSettings.value?.language1) {
+            val adjustedLanguage = supportFunctions.switchItem(nextLanguage, languages, isNext)
+            updateLanguage2(adjustedLanguage)
         } else {
-            updateLanguage2(languages[nextIndex])
+            updateLanguage2(nextLanguage)
         }
     }
 
     //Переключение уровня языка
     fun switchWordsLevel(isNext: Boolean) {
-        val currentIndex = levels.indexOf(_gameSettings.value?.level)
-        val nextIndex =
-            if (isNext) (currentIndex + 1) % levels.size else (currentIndex - +levels.size) % levels.size
-        updateLevel(levels[nextIndex])
+        val nextLevel = supportFunctions.switchItem(_gameSettings.value?.level, levels, isNext)
+        updateLevel(nextLevel)
     }
 
     //Переключение сложности
     fun switchDifficultLevel(isNext: Boolean) {
-        val currentIndex = difficult.indexOf(_gameSettings.value?.difficult)
-        val nextIndex =
-            if (isNext) (currentIndex + 1) % difficult.size else (currentIndex - +difficult.size) % difficult.size
-        updateDifficult(difficult[nextIndex])
+        val nextDifficult = supportFunctions.switchItem(_gameSettings.value?.difficult, difficult, isNext)
+        updateDifficult(nextDifficult)
     }
 
     //Переключение категории слов
-    fun switchWordsCathegory(isNext: Boolean) {
-        val currentIndex = categories.indexOf(_gameSettings.value?.category)
-        val nextIndex =
-            if (isNext) (currentIndex + 1) % categories.size else (currentIndex - +categories.size) % categories.size
-        updateCategory(categories[nextIndex])
+    fun switchWordsCategory(isNext: Boolean) {
+        val nextCategory = supportFunctions.switchItem(_gameSettings.value?.category, categories, isNext)
+        updateCategory(nextCategory)
     }
 
     fun updateLanguage1(newLanguage: Language) {
@@ -305,7 +297,6 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
 
     fun onLoading() {
         _gameState.value = _gameState.value?.copy(state = GameState.LOADING)
-
     }
 
     fun onGame() {
@@ -351,30 +342,24 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
 
     private fun loadWordsFromDatabase(onSuccess: () -> Unit) {
         viewModelScope.launch {
-            val wordsList = repository.getWordsPack(
+            val shuffledPairs = gameInteractor.getWordPairs(
                 _gameSettings.value?.language1 ?: Language.ENGLISH,
                 _gameSettings.value?.language2 ?: Language.SPANISH,
                 _gameSettings.value?.level ?: LanguageLevel.A1,
                 difficultLevel,
                 _gameSettings.value?.category ?: WordCategory.RANDOM
             )
-            if (wordsList.isEmpty()) {
-                onGameEnd() // Если список пуст, завершаем игру.
+            if (shuffledPairs.isEmpty()) {
+                onGameEnd()
                 return@launch
             }
 
-            pairsFromDatabase = wordsList.map { wordEntity ->
-                toWordPair(
-                    wordEntity,
-                    _gameSettings.value?.language1 ?: Language.ENGLISH,
-                    _gameSettings.value?.language2 ?: Language.SPANISH
-                )
-            }
-
+            pairsFromDatabase = shuffledPairs
             currentPage = 0
-            onSuccess()
+            onSuccess() // Переход к первой странице.
         }
     }
+
 
     fun onPageCompleted() {
         if (currentPage * pageSize < pairsFromDatabase.size) {
@@ -384,50 +369,24 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
         }
     }
 
-    private fun toWordPair(
-        wordEntity: WordEntity, original: Language, translate: Language
-    ): Pair<Word, Word> {
-        val word1 = getWordForLanguage(wordEntity, original)
-        val word2 = getWordForLanguage(wordEntity, translate)
-        return Pair(word1, word2)
-    }
-
-    private fun getWordForLanguage(entity: WordEntity, lang: Language): Word {
-        return when (lang) {
-            Language.ENGLISH -> Word(entity.id, entity.english, Language.ENGLISH)
-            Language.SPANISH -> Word(entity.id, entity.spanish, Language.SPANISH)
-            Language.RUSSIAN -> Word(entity.id, entity.russian, Language.RUSSIAN)
-            Language.FRENCH -> Word(entity.id, entity.french, Language.FRENCH)
-            Language.GERMAN -> Word(entity.id, entity.german, Language.GERMAN)
-        }
-    }
 
     private fun shufflePairs(input: List<Pair<Word, Word>>): List<Pair<Word, Word>> {
-        if (input.size <= 1) return input
-        val secondWords = input.map { it.second }.shuffled(Random(System.currentTimeMillis()))
-        var shuffledPairs: List<Pair<Word, Word>>
-        do {
-            val shuffledSecondWords = secondWords.shuffled(Random(System.currentTimeMillis()))
-            shuffledPairs = input.mapIndexed { index, pair ->
-                pair.first to shuffledSecondWords[index]
+        return gameInteractor.shufflePairs(input)
+    }
+
+    /*
+        private fun updateWordStats(wordEntity: WordEntity, isCorrect: Boolean) {
+            val updatedWord = wordEntity.copy(
+                correct = if (isCorrect) wordEntity.correct + 1 else wordEntity.correct,
+                mistake = if (!isCorrect) wordEntity.mistake + 1 else wordEntity.mistake,
+                date = getCurrentDate()
+            )
+            viewModelScope.launch {
+                repository.updateWord(updatedWord)
             }
-        } while (shuffledPairs.any { it.first.text == it.second.text })
-
-        return shuffledPairs
-    }
-/*
-    private fun updateWordStats(wordEntity: WordEntity, isCorrect: Boolean) {
-        val updatedWord = wordEntity.copy(
-            correct = if (isCorrect) wordEntity.correct + 1 else wordEntity.correct,
-            mistake = if (!isCorrect) wordEntity.mistake + 1 else wordEntity.mistake,
-            date = getCurrentDate()
-        )
-        viewModelScope.launch {
-            repository.updateWord(updatedWord)
         }
-    }
 
- */
+     */
 
     private fun getCurrentDate(): String {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -477,11 +436,11 @@ class GameViewModel(private val repository: DatabaseInteractor) : ViewModel() {
      */
     private fun getGameDifficult(difficultLevel: DifficultLevel): Int {
         return when (difficultLevel) {
-            DifficultLevel.EASY -> 12
-            DifficultLevel.MEDIUM -> 18
-            DifficultLevel.HARD -> 24
-            DifficultLevel.EXPERT -> 48
-            DifficultLevel.SURVIVAL -> 48
+            DifficultLevel.EASY -> 18
+            DifficultLevel.MEDIUM -> 24
+            DifficultLevel.HARD -> 48
+            DifficultLevel.EXPERT -> 96
+            DifficultLevel.SURVIVAL -> 192
         }
     }
 
