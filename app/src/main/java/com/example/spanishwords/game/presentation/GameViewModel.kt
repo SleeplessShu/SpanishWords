@@ -388,10 +388,7 @@ class GameViewModel(
 
      */
 
-    private fun getCurrentDate(): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return dateFormat.format(Date())
-    }
+
 
     fun loadNextPage() {
         if (currentPage * pageSize >= pairsFromDatabase.size) {
@@ -426,14 +423,6 @@ class GameViewModel(
         }
     }
 
-    /*
-    private fun getPagesCount(): Int{
-        val pagesCount = getGameDifficult(_gameSettings.value!!.difficult) / 6
-        return pagesCount
-    }
-
-
-     */
     private fun getGameDifficult(difficultLevel: DifficultLevel): Int {
         return when (difficultLevel) {
             DifficultLevel.EASY -> 18
