@@ -15,7 +15,7 @@ class ScoreAdapter(private val items: List<GameResult>) : RecyclerView.Adapter<V
 
     override fun onBindViewHolder(holder: ViewHolderScore, position: Int) {
         val item = items[position]
-        holder.name.text = item.name
+        holder.name.text = item.date
         holder.score.text = item.score
     }
 

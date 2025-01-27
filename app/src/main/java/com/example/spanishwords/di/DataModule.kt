@@ -6,7 +6,9 @@ import androidx.room.Room
 import com.example.spanishwords.App
 import com.example.spanishwords.game.data.database.AppDatabase
 import com.example.spanishwords.game.data.repositories.DatabaseRepositoryImpl
+import com.example.spanishwords.game.data.repositories.ScoreRepositoryImpl
 import com.example.spanishwords.game.domain.repositories.DatabaseRepository
+import com.example.spanishwords.game.domain.repositories.ScoreRepository
 import com.example.spanishwords.settings.data.ExternalNavigatorRepositoryImpl
 import com.example.spanishwords.settings.data.SettingsRepositoryImpl
 import com.example.spanishwords.settings.data.SharingRepositoryImpl
@@ -47,6 +49,12 @@ val dataModule = module {
             AppDatabase::class.java,
             "dictionary.db"
         ).createFromAsset("databases/dictionary_new.db").build()
+    }
+    single (named("scoreStore")){
+        App.appContext.getSharedPreferences("ScoreHistory", Context.MODE_PRIVATE)
+    }
+    single <ScoreRepository>{
+        ScoreRepositoryImpl(get(named("scoreStore")), get())
     }
 
 }

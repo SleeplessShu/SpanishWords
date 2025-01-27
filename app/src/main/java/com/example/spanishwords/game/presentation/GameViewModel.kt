@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.spanishwords.game.domain.api.GameInteractor
+import com.example.spanishwords.game.domain.api.ScoreInteractor
 import com.example.spanishwords.game.domain.models.LanguageLevel
 import com.example.spanishwords.game.domain.models.WordCategory
 import com.example.spanishwords.game.presentation.models.DifficultLevel
@@ -24,9 +25,9 @@ import java.util.Date
 import java.util.Locale
 
 class GameViewModel(
-    //private val repository: DatabaseInteractor,
     private val gameInteractor: GameInteractor,
     private val supportFunctions: SupportFunctions,
+    private val scoreInteractor: ScoreInteractor,
 ) : ViewModel() {
 
     private val languages = Language.entries.toTypedArray()
@@ -46,7 +47,7 @@ class GameViewModel(
     private var score: Int = 0
     private var lives: Int = 3
     private var difficultLevel: Int = 18
-    private val digitsInScore: Int = 10
+
     private var correctGuessesCounter: Int = 0
     private val pageSize = 6
     private var pairsFromDatabase: List<Pair<Word, Word>> = emptyList()
@@ -229,7 +230,7 @@ class GameViewModel(
     }
 
     private fun getScoreAsString(score: Int): String {
-        return String.format("%0${digitsInScore}d", score)
+        return supportFunctions.getScoreAsString(score)
     }
 
     private fun clearSelectedList() {
@@ -313,10 +314,12 @@ class GameViewModel(
 
     fun onGameEnd() {
         onLoading()
+        val todaysScore = scoreInteractor.getTodaysResult()
         handler.postDelayed({
             _gameState.value = _gameState.value?.copy(
-                state = GameState.END_OF_GAME, lives = lives
+                state = GameState.END_OF_GAME, lives = lives, todaysScore = getScoreAsString(todaysScore)
             )
+            scoreInteractor.updateTodaysResult(score)
         }, DELAY_LOADING)
     }
 

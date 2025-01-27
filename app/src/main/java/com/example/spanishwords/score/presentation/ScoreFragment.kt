@@ -1,6 +1,7 @@
 package com.example.spanishwords.score.presentation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,8 +30,9 @@ class ScoreFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupObservers()
         setupUI()
+        setupObservers()
+
     }
 
     private fun setupUI(){
@@ -38,19 +40,11 @@ class ScoreFragment : Fragment() {
     }
 
     private fun setupObservers(){
-        binding.scoreRecycleView.adapter = ScoreAdapter(scoresList)
+        viewModel.scoreResults.observe(viewLifecycleOwner) { newData ->
+            Log.d("DEBUG", "SCOREDATA: ${newData}")
+            binding.scoreRecycleView.adapter = ScoreAdapter(newData)
+        }
+
     }
 
-   private companion object{
-       private val scoresList = listOf(
-           GameResult("Alex", "999999999"),
-           GameResult("Brian", "888888888"),
-           GameResult("Catherine", "777777777"),
-           GameResult("Daniel", "666666666"),
-           GameResult("Eva", "555555555"),
-           GameResult("Frank", "444444444"),
-           GameResult("Grace", "333333333"),
-           GameResult("Hannah", "222222222")
-       )
-   }
 }
