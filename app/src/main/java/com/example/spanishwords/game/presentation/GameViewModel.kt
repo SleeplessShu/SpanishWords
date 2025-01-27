@@ -132,13 +132,13 @@ class GameViewModel(
             1 -> {
                 if (isSameWord(clickedWord)) {
                     clearSelectedList()
-                    Log.d("missing_spot", "onWordClick: 1-if")
+
                 } else if (isSameLanguage(clickedWord)) {
-                    Log.d("missing_spot", "onWordClick: 1-elseif")
+
                     replaceInSelectedList(clickedWord)
 
                 } else {
-                    Log.d("missing_spot", "onWordClick: 1-else")
+
                     addInSelectedList(clickedWord)
                     checkPair(_ingameWordsState.value!!.selectedWords)
                 }
@@ -177,12 +177,12 @@ class GameViewModel(
 
 
     private fun checkPair(pair: List<Word>) {
-        Log.d("DEBUG", "!!!checkPair: ${pair[0]}, ${pair[1]}")
+
         if (isMatchingPair(pair[0], pair[1])) {
             reactOnCorrect()
             correctGuessesCounter++
             updateCorrectWordsList(pair[0], pair[1])
-            Log.d("DEBUG", "checkPair: ISCORRECT")
+
         } else {
             updateErrorList(pair[0], pair[1])
             reactOnError()
@@ -207,7 +207,7 @@ class GameViewModel(
         removeScoreAndLive()
         _gameState.postValue(
             _gameState.value?.copy(
-                lives = lives, score = getScoreAsString(score)
+                lives = lives, score = supportFunctions.getScoreAsString(score)
             )
         )
     }
@@ -216,7 +216,7 @@ class GameViewModel(
         addScoreAndLive()
         _gameState.postValue(
             _gameState.value?.copy(
-                lives = lives, score = getScoreAsString(score)
+                lives = lives, score = supportFunctions.getScoreAsString(score)
             )
         )
     }
@@ -229,9 +229,7 @@ class GameViewModel(
         }
     }
 
-    private fun getScoreAsString(score: Int): String {
-        return supportFunctions.getScoreAsString(score)
-    }
+
 
     private fun clearSelectedList() {
         _ingameWordsState.value = _ingameWordsState.value?.copy(
@@ -248,7 +246,6 @@ class GameViewModel(
         }
         clearSelectedList()
         _ingameWordsState.value = _ingameWordsState.value?.copy(correctWords = newState)
-        Log.d("DEBUG", "updateCorrectWordsList: ${newState}")
         updateUsedWordsList(first, second)
     }
 
@@ -317,7 +314,7 @@ class GameViewModel(
         val todaysScore = scoreInteractor.getTodaysResult()
         handler.postDelayed({
             _gameState.value = _gameState.value?.copy(
-                state = GameState.END_OF_GAME, lives = lives, todaysScore = getScoreAsString(todaysScore)
+                state = GameState.END_OF_GAME, lives = lives, todaysScore = supportFunctions.getScoreAsString(todaysScore)
             )
             scoreInteractor.updateTodaysResult(score)
         }, DELAY_LOADING)
@@ -338,8 +335,8 @@ class GameViewModel(
         score = 0
         correctGuessesCounter = 0
         currentPage = 0
-        difficultLevel = getGameDifficult(_gameSettings.value?.difficult ?: DifficultLevel.MEDIUM)
-        lives = getLivesCount(_gameSettings.value?.difficult ?: DifficultLevel.MEDIUM)
+        difficultLevel = supportFunctions.getGameDifficult(_gameSettings.value?.difficult ?: DifficultLevel.MEDIUM)
+        lives = supportFunctions.getLivesCount(_gameSettings.value?.difficult ?: DifficultLevel.MEDIUM)
     }
 
 
@@ -426,25 +423,7 @@ class GameViewModel(
         }
     }
 
-    private fun getGameDifficult(difficultLevel: DifficultLevel): Int {
-        return when (difficultLevel) {
-            DifficultLevel.EASY -> 18
-            DifficultLevel.MEDIUM -> 24
-            DifficultLevel.HARD -> 48
-            DifficultLevel.EXPERT -> 96
-            DifficultLevel.SURVIVAL -> 192
-        }
-    }
 
-    private fun getLivesCount(difficultLevel: DifficultLevel): Int {
-        return when (difficultLevel) {
-            DifficultLevel.EASY -> 3
-            DifficultLevel.MEDIUM -> 3
-            DifficultLevel.HARD -> 2
-            DifficultLevel.EXPERT -> 1
-            DifficultLevel.SURVIVAL -> 1
-        }
-    }
 
 
     private companion object {

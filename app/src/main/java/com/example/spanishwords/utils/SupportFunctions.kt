@@ -1,6 +1,7 @@
 package com.example.spanishwords.utils
 
 
+import com.example.spanishwords.game.presentation.models.DifficultLevel
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -33,4 +34,23 @@ class SupportFunctions {
             .mapKeys { entry -> entry.key.format(dateFormatter) } // Преобразуем обратно ключи в строковый формат
     }
 
+     fun getGameDifficult(difficultLevel: DifficultLevel): Int {
+        return when (difficultLevel) {
+            DifficultLevel.EASY -> 18
+            DifficultLevel.MEDIUM -> 24
+            DifficultLevel.HARD -> 48
+            DifficultLevel.EXPERT -> 96
+            DifficultLevel.SURVIVAL -> 192
+        }
+    }
+
+     fun getLivesCount(difficultLevel: DifficultLevel): Int {
+        return when (difficultLevel) {
+            DifficultLevel.EASY -> 3
+            DifficultLevel.MEDIUM -> 3
+            DifficultLevel.HARD -> 2
+            DifficultLevel.EXPERT -> 1
+            DifficultLevel.SURVIVAL -> 1
+        }
+    }
 }
