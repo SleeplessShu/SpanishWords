@@ -1,5 +1,6 @@
 package com.example.spanishwords.score.presentation
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,21 +16,20 @@ class ScoreViewModel(
     val scoreResults: LiveData<List<GameResult>> get() = _scoreResults
 
 
-    init{
-        updateScoreList()
+    init {
+        observeScoreChanges()
     }
 
-    private fun getScoreList():List<GameResult>{
-        val databaseResponse = scoreInteractor.getAllDaysResults()
-        return databaseResponse.map { (date, score) ->
-            GameResult(
-                date = date,
-                score = supportFunctions.getScoreAsString(score)
-            )
+    private fun observeScoreChanges() {
+        scoreInteractor.getAllDaysResults().observeForever { databaseResponse ->
+            val updatedScoreList = databaseResponse.map { (date, score) ->
+                GameResult(
+                    date = date,
+                    score = supportFunctions.getScoreAsString(score)
+                )
+            }
+            Log.d("DEBUG", "observeScoreChanges: ${_scoreResults.value}")
+            _scoreResults.postValue(updatedScoreList)
         }
-    }
-    private fun updateScoreList(){
-        val scoreListData = getScoreList()
-        _scoreResults.postValue(scoreListData)
     }
 }
