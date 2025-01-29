@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import com.example.spanishwords.R
 import com.example.spanishwords.databinding.MatchSettingsFragmentBinding
 import com.example.spanishwords.game.presentation.GameViewModel
@@ -35,8 +36,56 @@ class MatchSettingsFragment : Fragment(R.layout.match_settings_fragment) {
     }
 
     private fun setupObservers(){
+
+        // Подписка на изменения LiveData
+        parentViewModel.gameSettings.observe(viewLifecycleOwner, Observer { settings ->
+            binding.tvFirstLanguage.text = settings.language1.toString()
+            binding.tvSecondLanguage.text = settings.language2.toString()
+            binding.tvWordsLevel.text = settings.level.toString()
+            binding.tvDifficult.text = settings.difficult.toString()
+            binding.tvWordsCategory.text = settings.category.toString()
+        })
+
         binding.bNewGame.setOnClickListener {
             parentViewModel.onGame()
         }
+
+        binding.blLanguage1.setOnClickListener{
+            parentViewModel.switchLanguage1(isNext = false)
+        }
+        binding.brLanguage1.setOnClickListener {
+            parentViewModel.switchLanguage1(isNext = true)
+        }
+
+        binding.blLanguage2.setOnClickListener{
+            parentViewModel.switchLanguage2(isNext = false)
+        }
+        binding.brLanguage2.setOnClickListener {
+            parentViewModel.switchLanguage2(isNext = true)
+        }
+
+        binding.blWordsLevel.setOnClickListener{
+            parentViewModel.switchWordsLevel(isNext = false)
+        }
+        binding.brWordsLevel.setOnClickListener {
+            parentViewModel.switchWordsLevel(isNext = true)
+        }
+
+        binding.blDifficult.setOnClickListener{
+            parentViewModel.switchDifficultLevel(isNext = false)
+        }
+        binding.brDifficult.setOnClickListener {
+            parentViewModel.switchDifficultLevel(isNext = true)
+        }
+
+        binding.blWordsCategory.setOnClickListener{
+            parentViewModel.switchWordsCategory(isNext = false)
+        }
+        binding.brWordsCategory.setOnClickListener {
+            parentViewModel.switchWordsCategory(isNext = true)
+        }
+
+
+
     }
 }

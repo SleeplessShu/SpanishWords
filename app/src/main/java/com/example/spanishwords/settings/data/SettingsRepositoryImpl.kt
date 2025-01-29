@@ -26,7 +26,10 @@ class SettingsRepositoryImpl(
         )
     }
 
+
+
     companion object {
         const val THEME_STATUS_SHARED_PREFERENCES_KEY: String = "NightMode"
+
     }
 }

@@ -1,6 +1,7 @@
 package com.example.spanishwords.game.presentation.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +14,6 @@ import com.example.spanishwords.game.presentation.GameViewModel
 import com.example.spanishwords.game.presentation.models.Word
 import com.example.spanishwords.game.presentation.holders.WordsMatchingAdapter
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class WordsMatchingFragment : Fragment(R.layout.words_matching_fragment) {
     private val parentViewModel: GameViewModel by sharedViewModel(
@@ -55,19 +55,16 @@ class WordsMatchingFragment : Fragment(R.layout.words_matching_fragment) {
             adapter.updateWordsList(wordsPairs)
         }
 
-        parentViewModel.selectedWords.observe(viewLifecycleOwner) { selectedWords ->
-            adapter.updateSelectedWords(selectedWords)
-        }
-
-        parentViewModel.errorWords.observe(viewLifecycleOwner) { errorWords ->
-            adapter.updateErrorWords(errorWords)
-        }
-        parentViewModel.correctWords.observe(viewLifecycleOwner) { correctWords ->
-            adapter.updateCorrectWords(correctWords)
-        }
-
-        parentViewModel.usedWords.observe(viewLifecycleOwner) { usedWords ->
-            adapter.updateUsedWords(usedWords)
+        parentViewModel.ingameWordsState.observe(viewLifecycleOwner) { ingameWordState ->
+            Log.d("DEBUG", "setupObservers:\n" +
+                    "selected ${ingameWordState.selectedWords}\n" +
+                    "correct ${ingameWordState.correctWords}\n" +
+                    "used ${ingameWordState.usedWords}\n" +
+                    "error ${ingameWordState.errorWords} ")
+            adapter.updateSelectedWords(ingameWordState.selectedWords)
+            adapter.updateErrorWords(ingameWordState.errorWords)
+            adapter.updateCorrectWords(ingameWordState.correctWords)
+            adapter.updateUsedWords(ingameWordState.usedWords)
         }
         parentViewModel.gameState.observe(viewLifecycleOwner) { gameState ->
             binding.tvScores.setText(gameState.score)

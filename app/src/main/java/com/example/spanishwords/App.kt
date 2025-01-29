@@ -2,6 +2,7 @@ package com.example.spanishwords
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.room.Room
 import com.example.spanishwords.di.dataModule
@@ -21,18 +22,23 @@ class App : Application() {
         super.onCreate()
 
         appContext = applicationContext
-
+        Log.d("DEBUG", "onCreate: ${appContext.getDatabasePath("dictionary_new.db")}")
         startKoin {
             androidContext(this@App)
             modules(dataModule, domainModule, presentationModule)
         }
-        copyDatabaseFromAssets(this, "dictionary.dp")
-
+        //copyDatabaseFromAssets(appContext)
+        deleteExistingDatabase(appContext, "dictionary.db")
         database = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java,
-            "dictionary.dp"  // Название локальной базы данных
-        ).build()
+            "dictionary_new.db"  // Название локальной базы данных
+        )
+            .createFromAsset("databases/dictionary_new.db")
+            .build()
+
+
+
 
         val settingsInteractor: SettingsInteractor = getKoin().get()
         val isNightModeOn = settingsInteractor.getThemeSettings()
@@ -41,29 +47,17 @@ class App : Application() {
         )
 
     }
-    fun copyDatabaseFromAssets(context: Context, dbName: String) {
+    fun deleteExistingDatabase(context: Context, dbName: String) {
         val dbPath = context.getDatabasePath(dbName)
-
-        // Проверяем, существует ли уже база данных
         if (dbPath.exists()) {
-            return // База данных уже скопирована
-        }
-
-        // Создаем папку для базы данных, если её нет
-        dbPath.parentFile?.mkdirs()
-
-        // Копирование файла
-        val inputStream: InputStream = context.assets.open("databases/$dbName")
-        val outputStream = FileOutputStream(dbPath)
-
-        inputStream.use { input ->
-            outputStream.use { output ->
-                input.copyTo(output)
-            }
+            dbPath.delete()
+            Log.d("Database", "Старая база данных удалена.")
         }
     }
 
+
     companion object {
+
         lateinit var database: AppDatabase
         lateinit var appContext: Context
             private set

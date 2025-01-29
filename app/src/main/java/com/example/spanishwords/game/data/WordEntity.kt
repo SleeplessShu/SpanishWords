@@ -3,7 +3,7 @@ package com.example.spanishwords.game.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "dictionaryA1_v01")
+@Entity(tableName = "A1")
 data class WordEntity(
     @PrimaryKey val id: Int,
     val level: String,
