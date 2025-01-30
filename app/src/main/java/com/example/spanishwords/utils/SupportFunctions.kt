@@ -23,7 +23,7 @@ class SupportFunctions {
         return dateFormat.format(Date())
     }
      fun getScoreAsString(score: Int): String {
-        return score.toString().padStart(9, '0')
+        return score.toString().padStart(7, '0')
     }
     fun sortMapByDateDescending(inputMap: Map<String, Int>): Map<String, Int> {
         val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
