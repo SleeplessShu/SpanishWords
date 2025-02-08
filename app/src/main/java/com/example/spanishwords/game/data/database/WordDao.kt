@@ -15,7 +15,7 @@ import com.example.spanishwords.game.presentation.models.Language
 //  `viewModelScope.launch`, which already is async, so I think removing suspend
 //  achieves the same result?
 //
-//  UPD: Check this and I'm wrong
+//  UPD: I've checked and I'm wrong :D, don't listen to what I said above
 //  btw, recommend this video highly: https://www.youtube.com/watch?v=rB5Q3y73FTo
 //  and this article is good for android specific:
 //  https://developer.android.com/kotlin/coroutines/coroutines-best-practices
