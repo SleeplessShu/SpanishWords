@@ -24,6 +24,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+// egusev seems too big and difficult, but I guess that's normal for a ViewModel?
+// Maybe you know of a way to split the logic between different ViewModels / any other way to
+//  simplify
 class GameViewModel(
     private val gameInteractor: GameInteractor,
     private val supportFunctions: SupportFunctions,
@@ -105,6 +108,10 @@ class GameViewModel(
     }
 
     fun updateLanguage1(newLanguage: Language) {
+        // egusev doing copy every time seems wrong, probably can do something like
+        // _gameSettings.value.language1 = newLanguage
+        // _gameSettings.doSomethingToNotifyAboutUpdate()
+        // but not literally. Should be a way to not recreate _gameSettings every time, but idk
         _gameSettings.value = _gameSettings.value?.copy(language1 = newLanguage)
     }
 
@@ -156,11 +163,39 @@ class GameViewModel(
     }
 
     private fun isSameLanguage(clickedWord: Word): Boolean {
-        return (_ingameWordsState.value!!.selectedWords[0].language == clickedWord.language && _ingameWordsState.value!!.selectedWords[0].id != clickedWord.id)
+        // egusev !! is a sign that something is probably not right
+        //  also, can save the result of _ingameWordsState.value!! and reuse, that seems cleaner,
+        //  and also avoids a race condition if the _ingameWordsState has been changed between
+        //  the 2 checks -- not sure about this whole thing, but probably you want to do checks for
+        //  the same state.
+        val state = _ingameWordsState.value
+        if (state == null) {
+            // egusev handle properly, this is just an example, I don't know how to log in android
+            Log.e("error", "no state, achtung!!!")
+            return false
+        }
+        // and can also probably wrap this whole thing as a
+        //  `private fun MutableLiveData<IngameWordsState>.getState(): IngameWordsState {`
+        //  below, and do `val state = _ingameWordsState.getState()`
+        return (state.selectedWords[0].language == clickedWord.language
+                && state.selectedWords[0].id != clickedWord.id)
+    }
+
+    // egusev just an example, remove from here
+    private fun MutableLiveData<IngameWordsState>.getState(): IngameWordsState {
+        val state = this.value
+        if (state == null) {
+            // egusev handle properly, this is just an example
+            Log.e("error", "no state, achtung!!!")
+            throw Exception()
+        }
+        return state
     }
 
     private fun isSameWord(clickedWord: Word): Boolean {
-        return _ingameWordsState.value!!.selectedWords.isNotEmpty() && clickedWord.id == _ingameWordsState.value!!.selectedWords[0].id && clickedWord.language == _ingameWordsState.value!!.selectedWords[0].language
+        return _ingameWordsState.value!!.selectedWords.isNotEmpty() &&
+                clickedWord.id == _ingameWordsState.value!!.selectedWords[0].id &&
+                clickedWord.language == _ingameWordsState.value!!.selectedWords[0].language
     }
 
     private fun replaceInSelectedList(clickedWord: Word) {
@@ -178,6 +213,12 @@ class GameViewModel(
 
     private fun checkPair(pair: List<Word>) {
 
+        // egusev you take a list, but always expect it to be 2 words?
+        //  why accept a list then? what if someone calls this function and doesn't pass 2 elements?
+        // Also, you use Pair<Word, Word> a lot it seems like, can make it your own class, like
+        //  data class WordPair(val first: Word, val second: Word)
+        //  and add a `fun isMathcingPair(): Boolean` fun to it instead, also re-use it in all
+        //  repositories -- will probably come in handy to have it as a class in the future
         if (isMatchingPair(pair[0], pair[1])) {
             reactOnCorrect()
             correctGuessesCounter++
@@ -240,6 +281,10 @@ class GameViewModel(
 
     private fun updateCorrectWordsList(first: Word, second: Word) {
 
+        // egusev this:
+        //  val newState1 = _ingameWordsState.value?.correctWords.orEmpty() + listOf(first, second)
+        //  creates less collections, probably can do something smarter even, reusing the collection
+        //  `correctWords` if it's MutableList, and reassigning it - same suggestion as line 111
         val newState = _ingameWordsState.value?.correctWords.orEmpty().toMutableList().apply {
             add(first)
             add(second)
@@ -374,6 +419,7 @@ class GameViewModel(
         return gameInteractor.shufflePairs(input)
     }
 
+    // egusev better not to leave comments of dead code
     /*
         private fun updateWordStats(wordEntity: WordEntity, isCorrect: Boolean) {
             val updatedWord = wordEntity.copy(
