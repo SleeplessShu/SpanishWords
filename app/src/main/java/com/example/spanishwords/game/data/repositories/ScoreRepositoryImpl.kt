@@ -7,6 +7,8 @@ import com.example.spanishwords.game.domain.repositories.ScoreRepository
 import com.example.spanishwords.utils.SupportFunctions
 
 class ScoreRepositoryImpl(
+    // egusev from the description doesn't seem that this is the right class to use,
+    //  probably should store this in db locally or on the server? I don't know what's right
     private var sharedPreferences: SharedPreferences,
     private val supportFunctions: SupportFunctions,
 ) : ScoreRepository {
@@ -14,6 +16,7 @@ class ScoreRepositoryImpl(
     private val _allDaysResults = MutableLiveData<Map<String, Int>>()
 
     init {
+        // egusev can't this take long to load? especially on init every time
         _allDaysResults.value = supportFunctions.sortMapByDateDescending(sharedPreferences.all
             .filterValues { it is Int }
             .mapValues { it.value as Int }
@@ -27,6 +30,14 @@ class ScoreRepositoryImpl(
         val newResult = currentResult + matchResult
 
         sharedPreferences.edit().putInt(currentDate, newResult).apply()
+
+        // egusev doesn't _allDaysResults already have the todaysResult?
+        //  probably can make _allDaysResult a MutableMap
+        //  and just do something like _allDaysResults.value[currentDate] = currentResult
+        //  or _allDaysResults.postValue(_allDaysResults.value.apply { it[currentDate] = currentResult })
+        //  if this is needed for LiveData
+        //   or do any other optimization
+        //   instead of filtering+maping+sorting etc
 
         // Обновляем LiveData
         val updatedMap = sharedPreferences.all
@@ -42,6 +53,7 @@ class ScoreRepositoryImpl(
 
     override fun getAllDaysResults(): LiveData<Map<String, Int>> = _allDaysResults
 
+    // egusev unused function
     fun updateResult(date: String, score: Int) {
         val editor = sharedPreferences.edit()
         editor.putInt(date, score).apply()
@@ -55,6 +67,7 @@ class ScoreRepositoryImpl(
 
 
 
+    // egusev unused function, extra tab, magic constants
         private fun uploadTestData() {
             val testGameResults = mapOf(
                 "2024-01-01" to 100,

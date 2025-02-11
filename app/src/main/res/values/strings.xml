@@ -31,6 +31,7 @@
     <string name="mailToSupportSubject">Сообщение разработчикам и разработчицам приложения Playlist Maker</string>
     <string name="mailToSupportText">Спасибо разработчикам и разработчицам за крутое приложение!</string>
     <!--LINKS-->
+    <!-- egusev constants seem default -->
     <string name="linkToAgreement">https://yandex.ru/legal/practicum_offer/</string>
     <string name="linkToAndroidCourse">https://practicum.yandex.ru/android-developer/</string>
     <string name="supportEmail">di.burmistrov@yandex.ru</string>

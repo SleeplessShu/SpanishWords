@@ -10,14 +10,23 @@ import com.example.spanishwords.game.presentation.models.Language
 class DatabaseRepositoryImpl(private val wordDao: WordDao) : DatabaseRepository {
 
     override suspend fun getWordsPack(
+        // egusev 3 params below are unused
         language1: Language,
         language2: Language,
         level: LanguageLevel,
+
         difficultLevel: Int,
         category: WordCategory
     ): List<WordEntity> {
         var dataBaseResponse = emptyList<WordEntity>()
         if (category == WordCategory.RANDOM) {
+            // egusev difficultLevel is limit of words? unclear naming
+            // also, personally would prefer if repository didn't have logic under if, better to
+            //  make 2 functions IMO and let the service (e.g. db interactor) decide
+            //  which one to call -- as a bonus, would not have to use var
+
+            // even here can just do "return getRandom(..
+            //  and return adaptForConditions(.. and have no vars
            dataBaseResponse = getRandom(difficultLevel)
         } else {
             dataBaseResponse = wordDao.getWordsByCategory(category)
@@ -27,6 +36,10 @@ class DatabaseRepositoryImpl(private val wordDao: WordDao) : DatabaseRepository 
     }
 
     suspend fun getRandom(wordsNeeded: Int): List<WordEntity> {
+        // egusev what are additionalWords in this context?
+        // context should be encapsulated inside a function, this one just gets random words,
+        //  doesn't know what "additional" or not is
+        // btw, this is public, but not from interface -- is that expected?
         val additionalWords = wordDao.getRandom(wordsNeeded)
         return additionalWords
     }

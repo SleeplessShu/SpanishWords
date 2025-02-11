@@ -15,10 +15,13 @@ class GameInteractorImpl(private val repository: DatabaseInteractor) : GameInter
     override suspend fun getWordPairs(
         language1: Language,
         language2: Language,
+        // egusev level is unused (because it's unused in repository too)
         level: LanguageLevel,
         difficultLevel: Int,
         category: WordCategory
     ): List<Pair<Word, Word>> {
+        // egusev seems fishy that this funciton is suspend, but I don't know how to fix or if
+        //  this needs fixing
         val wordsList = repository.getWordsPack(language1, language2, level, difficultLevel, category)
         Log.d("GameInteractorTesting", "getWordPairs: ${wordsList}")
         return wordsList.map { wordEntity ->
@@ -28,6 +31,7 @@ class GameInteractorImpl(private val repository: DatabaseInteractor) : GameInter
 
     override fun shufflePairs(input: List<Pair<Word, Word>>): List<Pair<Word, Word>> {
         if (input.size <= 1) return input
+        // egusev can't you do return input.shuffled(...)? Gives the same result
         val secondWords = input.map { it.second }.shuffled(Random(System.currentTimeMillis()))
         return input.mapIndexed { index, pair ->
             pair.first to secondWords[index]
@@ -41,12 +45,17 @@ class GameInteractorImpl(private val repository: DatabaseInteractor) : GameInter
     }
 
     override fun getWordForLanguage(entity: WordEntity, lang: Language): Word {
-        return when (lang) {
-            Language.ENGLISH -> Word(entity.id, entity.english, Language.ENGLISH)
-            Language.SPANISH -> Word(entity.id, entity.spanish, Language.SPANISH)
-            Language.RUSSIAN -> Word(entity.id, entity.russian, Language.RUSSIAN)
-            Language.FRENCH -> Word(entity.id, entity.french, Language.FRENCH)
-            Language.GERMAN -> Word(entity.id, entity.german, Language.GERMAN)
+        // egusev this seems a bit cleaner, can also move the when(lang) logic to extension fun
+        //  of WordEntity, so you'd do something like
+        //  return Word(entity.id, entity.getTranslation(lang), lang)
+        //  and .getTranslation(lang) would do the when(lang) ... logic
+        val mappedTranslation = when(lang) {
+            Language.ENGLISH -> entity.english
+            Language.SPANISH -> entity.spanish
+            Language.RUSSIAN -> entity.russian
+            Language.FRENCH -> entity.french
+            Language.GERMAN -> entity.german
         }
+        return Word(entity.id, mappedTranslation, lang)
     }
 }

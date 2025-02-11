@@ -39,6 +39,7 @@ class WordsMatchingAdapter(
         holder.origin.setTextColor(
             getTextColor(origin)
         )
+        // egusev cool !in operator, didn't know of it
         holder.origin.isEnabled = origin !in usedWords
         holder.origin.setOnClickListener { onWordClick(origin) }
         holder.translate.text = translate.text

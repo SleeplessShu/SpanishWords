@@ -7,6 +7,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import java.util.SortedMap
 
 class SupportFunctions {
     fun <T> switchItem(currentItem: T?, items: Array<T>, isNext: Boolean): T {
@@ -25,15 +26,24 @@ class SupportFunctions {
      fun getScoreAsString(score: Int): String {
         return score.toString().padStart(9, '0')
     }
-    fun sortMapByDateDescending(inputMap: Map<String, Int>): Map<String, Int> {
-        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    fun sortMapByDateDescending(inputMap: Map<String, Int>): SortedMap<String, Int> {
+//        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
         return inputMap
-            .mapKeys { entry -> LocalDate.parse(entry.key, dateFormatter) } // Преобразуем ключи в LocalDate
+            // egusev yyyy-MM-dd format should be sortable as a string without formatting
+            //  to LocalDate
+            //  (1234-01-23 < 2001-01-10 < 2001-01-11 < 2020-10-31 < ... etc)
+            //  So it seems that it can be replace to just `toSortedMap`
+//            .mapKeys { entry -> LocalDate.parse(entry.key, dateFormatter) } // Преобразуем ключи в LocalDate
             .toSortedMap(compareByDescending { it }) // Сортируем по убыванию дат
-            .mapKeys { entry -> entry.key.format(dateFormatter) } // Преобразуем обратно ключи в строковый формат
+//            .mapKeys { entry -> entry.key.format(dateFormatter) } // Преобразуем обратно ключи в строковый формат
+
+            //  By the way, should this even be a map? It's not usually expected that a Map is sorted
+            //  maybe can explicitly return SortedMap if you really need a map, or just use a List
+            //  or a SortedSet (not sure, maybe map is needed in the business logic)
     }
 
+    // egusev can just expand enum to have an Int field I think?
      fun getGameDifficult(difficultLevel: DifficultLevel): Int {
         return when (difficultLevel) {
             DifficultLevel.EASY -> 18
@@ -44,6 +54,7 @@ class SupportFunctions {
         }
     }
 
+    // egusev same as getGameDifficult(y)
      fun getLivesCount(difficultLevel: DifficultLevel): Int {
         return when (difficultLevel) {
             DifficultLevel.EASY -> 3

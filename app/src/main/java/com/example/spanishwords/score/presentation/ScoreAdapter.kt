@@ -24,6 +24,10 @@ class ScoreAdapter(private var items: MutableList<GameResult>) : RecyclerView.Ad
     fun updateData(newItems: List<GameResult>) {
         items.clear()
         items.addAll(newItems)
+        // egusev Android studio suggests, quote:
+        //   It will always be more efficient to use more specific change events if you can.
+        //    Rely on notifyDataSetChanged as a last resort.
+        // I'd trust that - should check
         notifyDataSetChanged()
     }
 }
